@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Interclasse - Inscrições</title>
+
+<!-- Fonte -->
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<!-- jsPDF -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+
+<style>
+  :root{
+    --blue-600:#0d6efd;
+    --blue-500:#2f8bff;
+    --bg:#f3f5f7;
+    --card:#ffffff;
+    --muted:#6b7280;
+  }
+
+  *{box-sizing:border-box}
+  body{
+    margin:0;
+    font-family:"Poppins",sans-serif;
+    background:var(--bg);
+    color:#111827;
+  }
+
+  header{
+    background: linear-gradient(135deg,var(--blue-600),#4dabf7);
+    padding:18px 0;
+    box-shadow:0 6px 18px rgba(13,110,253,0.12);
+  }
+  .header-container{
+    max-width:1100px;
+    margin:0 auto;
+    padding:0 18px;
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    gap:12px;
+  }
+  header h1{
+    color:#fff;
+    margin:0;
+    font-weight:700;
+    letter-spacing:0.2px;
+    font-size:1.4rem;
+  }
+  .admin-btn{
+    background:#fff;
+    color:var(--blue-600);
+    padding:8px 14px;
+    border-radius:10px;
+    border:0;
+    font-weight:700;
+    cursor:pointer;
+    box-shadow:0 4px 14px rgba(0,0,0,0.08);
+  }
+  .admin-btn:hover{ transform:translateY(-2px) }
+
+  /* Container do form */
+  .container{
+    max-width:900px;
+    margin:28px auto;
+    background:var(--card);
+    padding:26px;
+    border-radius:14px;
+    box-shadow:0 8px 30px rgba(2,6,23,0.06);
+  }
+
+  h2{ margin:0 0 12px 0; font-size:1.25rem; font-weight:700; color:#0f172a;}
+  label{ display:block; font-weight:600; margin-top:14px; color:#0f172a;}
+  input,select,textarea{
+    width:100%;
+    padding:12px;
+    margin-top:8px;
+    border-radius:10px;
+    border:1px solid #d1d5db;
+    background:#fbfdff;
+    font-size:14px;
+  }
+  input:focus,select:focus,textarea:focus{ outline:none; box-shadow:0 4px 12px rgba(13,110,253,0.12); border-color:var(--blue-600) }
+
+  .btn-primary{
+    width:100%;
+    margin-top:18px;
+    padding:12px;
+    border-radius:12px;
+    border:0;
+    background:var(--blue-500);
+    color:#fff;
+    font-weight:700;
+    cursor:pointer;
+  }
+  .btn-primary:hover{ background:#0b5fe2 }
+
+  /* Admin panel */
+  #admin-panel{
+    display:none;
+    max-width:1100px;
+    margin:22px auto;
+    background:var(--card);
+    padding:20px;
+    border-radius:12px;
+    box-shadow:0 8px 30px rgba(2,6,23,0.06);
+  }
+
+  .controls{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    margin-bottom:12px;
+  }
+  .export-btn{
+    padding:10px 14px;
+    border-radius:10px;
+    border:0;
+    background:var(--blue-500);
+    color:#fff;
+    cursor:pointer;
+    font-weight:700;
+  }
+  .export-btn:hover{ background:#0b5fe2 }
+
+  table{
+    width:100%;
+    border-collapse:collapse;
+    border-radius:8px;
+    overflow:hidden;
+  }
+  thead th{
+    text-align:left;
+    background:#eef6ff;
+    padding:12px 10px;
+    font-weight:700;
+  }
+  tbody td{
+    padding:10px;
+    border-bottom:1px solid #f0f4f8;
+    font-size:14px;
+  }
+  tbody tr:hover td{ background:#fbfdff }
+  .del-btn{
+    padding:6px 8px;
+    border-radius:8px;
+    border:0;
+    background:#ff4d4f;
+    color:white;
+    cursor:pointer;
+    font-weight:700;
+  }
+
+  /* Responsivo */
+  @media (max-width:720px){
+    .header-container{ padding:0 12px; }
+    .container{ margin:18px 12px; padding:18px }
+    #admin-panel{ margin:18px 12px; padding:16px }
+    thead th, tbody td{ font-size:13px }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="header-container">
+    <h1>Interclasse - Inscrições</h1>
+    <button class="admin-btn" onclick="openAdminLogin()">Admin</button>
+  </div>
+</header>
+
+<!-- FORMULÁRIO -->
+<div class="container" id="form-container">
+  <h2>Formulário de Inscrição</h2>
+
+  <form id="registerForm" autocomplete="off">
+    <label for="name">Nome</label>
+    <input id="name" name="name" placeholder="Nome completo" required />
+
+    <label for="turma">Turma</label>
+    <select id="turma" name="turma" required>
+      <option value="">Selecionar...</option>
+      <option>1ADI</option>
+      <option>1MAI</option>
+      <option>1NTD</option>
+      <option>VERDE</option>
+      <option>2MAI</option>
+      <option>2MKT</option>
+      <option>3MAI</option>
+      <option>3MKT</option>
+    </select>
+
+    <label for="modality">Modalidade</label>
+    <select id="modality" name="modality" required>
+      <!-- opções serão preenchidas via JS -->
+    </select>
+
+    <button class="btn-primary" type="submit">Enviar Inscrição</button>
+  </form>
+</div>
+
+<!-- ADMIN -->
+<div id="admin-panel">
+  <h2>Painel do Administrador</h2>
+
+  <div class="controls">
+    <button class="export-btn" onclick="exportPDF()">Exportar lista em PDF</button>
+
+    <div style="margin-left:12px;">
+      <label for="filterMod" style="font-weight:700; display:block; margin-bottom:6px;">Filtrar por modalidade</label>
+      <select id="filterMod" onchange="loadTable()" style="padding:10px; border-radius:8px; border:1px solid #d1d5db;">
+        <!-- preenchido via JS -->
+      </select>
+    </div>
+  </div>
+
+  <table aria-label="Lista de inscritos">
+    <thead>
+      <tr><th>Nome</th><th>Turma</th><th>Modalidade</th><th>Data</th><th>Ações</th></tr>
+    </thead>
+    <tbody id="table-body"></tbody>
+  </table>
+
+  <div style="margin-top:14px;">
+    <button onclick="resetAll()" style="background:#ff4d4f;color:#fff;padding:10px 14px;border-radius:8px;border:0;cursor:pointer;font-weight:700;">Resetar Tudo</button>
+  </div>
+</div>
+
+<script>
+/* ===== Config / Dados ===== */
+const STORAGE_KEY = "inter_regs_v1";
+
+/* inicializa lista */
+let regs = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+/* LIMITS (nomes devem bater com opções do select) */
+const LIMITS = {
+  "Vôlei de quadra masculino": 10,
+  "Vôlei de quadra feminino": 10,
+  "Futsal masculino": 10,
+  "Futsal feminino": 10,
+  "Altinha(misto)": 4,
+  "Vôlei praia dupla masculino": 4,
+  "Vôlei praia dupla feminino": 4,
+  "Atletismo - salto": 2,
+  "Xadrez": 2,
+  "Dama": 2,
+  "Uno": 2,
+  "Basquete": 8,
+  "Tabuada": 2,
+  "Soletrando": 2,
+  "Fifa": 2,
+  "Pebolim": 4
+};
+
+const ALL_MODALITIES = Object.keys(LIMITS);
+
+/* modalidades bloqueadas para a turma VERDE */
+const BLOCK_FOR_VERDE = ["Basquete","Futsal masculino","Futsal feminino"];
+
+/* referencias DOM */
+const form = document.getElementById("registerForm");
+const selTurma = document.getElementById("turma");
+const selMod = document.getElementById("modality");
+const adminPanel = document.getElementById("admin-panel");
+const formContainer = document.getElementById("form-container");
+const filterMod = document.getElementById("filterMod");
+const tableBody = document.getElementById("table-body");
+
+/* util: atualiza a variável regs com os dados atuais do localStorage */
+function refreshRegs(){
+  regs = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+}
+
+/* ===== popula o select de modalidades conforme turma selecionada ===== */
+function updateModalities(){
+  refreshRegs();
+  const turma = selTurma.value;
+  selMod.innerHTML = "<option value=''>Selecionar...</option>";
+  if(!turma) return;
+
+  ALL_MODALITIES.forEach(mod => {
+    // bloquear opções para turma VERDE
+    if(turma === "VERDE" && BLOCK_FOR_VERDE.includes(mod)) return;
+
+    const count = regs.filter(r => r.turma === turma && r.modality === mod).length;
+    const limit = LIMITS[mod] || 100;
+    if(count < limit){
+      const opt = document.createElement("option");
+      opt.value = mod;
+      opt.textContent = mod;
+      selMod.appendChild(opt);
+    }
+  });
+}
+
+/* evento: quando muda turma no formulário */
+selTurma.addEventListener("change", updateModalities);
+
+/* ===== submissão do formulário ===== */
+form.addEventListener("submit", (e)=>{
+  e.preventDefault();
+  refreshRegs();
+
+  const nome = (document.getElementById("name").value || "").trim();
+  const turma = selTurma.value;
+  const modality = selMod.value;
+
+  if(!nome || !turma || !modality){
+    return alert("Preencha todos os campos.");
+  }
+
+  // verificação de limite por turma
+  const already = regs.filter(r => r.turma === turma && r.modality === modality).length;
+  const limit = LIMITS[modality] || 1000;
+  if(already >= limit){
+    alert(`Limite atingido para ${modality} na turma ${turma}.`);
+    updateModalities();
+    return;
+  }
+
+  // cria registro com timestamp único
+  const created = new Date().toISOString();
+  regs.push({ name: nome, turma, modality, created });
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(regs));
+
+  alert("Inscrição realizada com sucesso!");
+  form.reset();
+  updateModalities();
+});
+
+/* ===== Admin: abrir com senha ===== */
+function openAdminLogin(){
+  const senha = prompt("Digite a senha do administrador:");
+  if(senha === null) return; // cancelou
+  if(senha === "2304"){
+    formContainer.style.display = "none";
+    adminPanel.style.display = "block";
+    loadFilterOptions();
+    loadTable();
+  } else {
+    alert("Senha incorreta!");
+  }
+}
+
+/* ===== Carregar opções do filtro (modalidades) ===== */
+function loadFilterOptions(){
+  filterMod.innerHTML = "<option value=''>Todas</option>";
+  ALL_MODALITIES.forEach(m => filterMod.innerHTML += `<option value="${m}">${m}</option>`);
+}
+
+/* ===== Carregar tabela administrativa ===== */
+function loadTable(){
+  refreshRegs();
+  let list = [...regs];
+
+  const selected = filterMod.value;
+  if(selected){
+    list = list.filter(r => r.modality === selected);
+  }
+
+  // ordenar por turma, depois nome
+  list.sort((a,b) => {
+    if(a.turma < b.turma) return -1;
+    if(a.turma > b.turma) return 1;
+    return a.name.localeCompare(b.name);
+  });
+
+  tableBody.innerHTML = "";
+  list.forEach((r, idx) => {
+    const tr = document.createElement("tr");
+    tr.innerHTML = `
+      <td>${escapeHtml(r.name)}</td>
+      <td>${escapeHtml(r.turma)}</td>
+      <td>${escapeHtml(r.modality)}</td>
+      <td>${new Date(r.created).toLocaleString()}</td>
+      <td><button class="del-btn" onclick="deleteRecord('${r.created}')">Excluir</button></td>
+    `;
+    tableBody.appendChild(tr);
+  });
+}
+
+/* ===== Excluir registro (por created timestamp) ===== */
+function deleteRecord(created){
+  if(!confirm("Confirmar exclusão deste registro?")) return;
+  refreshRegs();
+  regs = regs.filter(r => r.created !== created);
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(regs));
+  loadTable();
+}
+
+/* ===== Exportar PDF (jsPDF) ===== */
+function exportPDF(){
+  refreshRegs();
+  const data = regs;
+  if(!data || data.length === 0) return alert("Não há inscritos para exportar.");
+
+  const { jsPDF } = window.jspdf;
+  const doc = new jsPDF("p","pt","a4");
+  doc.setFontSize(18);
+  doc.text("Lista de Inscritos - Interclasse", 40, 40);
+
+  doc.setFontSize(11);
+  let y = 80;
+  const marginLeft = 40;
+  const col1 = marginLeft;
+  const col2 = marginLeft + 180;
+  const col3 = marginLeft + 270;
+  const col4 = marginLeft + 430;
+
+  // Cabeçalho
+  doc.setFont(undefined, "bold");
+  doc.text("Nome", col1, y);
+  doc.text("Turma", col2, y);
+  doc.text("Modalidade", col3, y);
+  doc.text("Data", col4, y);
+  doc.setFont(undefined, "normal");
+  y += 18;
+
+  data.forEach((r, i) => {
+    if(y > 740){ doc.addPage(); y = 40; }
+    doc.text(String(r.name), col1, y);
+    doc.text(String(r.turma), col2, y);
+    doc.text(String(r.modality), col3, y);
+    doc.text(String(new Date(r.created).toLocaleString()), col4, y);
+    y += 16;
+  });
+
+  doc.save("inscritos_interclasse.pdf");
+}
+
+/* ===== Resetar todos os dados ===== */
+function resetAll(){
+  if(!confirm("Tem certeza que deseja apagar todos os registros?")) return;
+  localStorage.removeItem(STORAGE_KEY);
+  regs = [];
+  loadTable();
+  alert("Todos os dados foram apagados.");
+}
+
+/* ===== util ===== */
+function escapeHtml(s){
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+}
+
+/* Inicializações ao carregar a página */
+(function init(){
+  // carrega opções de modalidade para filtro admin (mesmo que admin esteja escondido)
+  loadFilterOptions();
+  // atualiza o select de modalidades caso já exista turma selecionada
+  updateModalities();
+})();
+</script>
+</body>
+</html>
