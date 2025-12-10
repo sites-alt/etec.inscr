@@ -14,7 +14,6 @@
 <style>
   :root{
     --blue-600: #ff3b3b;
-    --blue-500:#ff3b3b;
     --bg:#f3f5f7;
     --card:#ffffff;
   }
@@ -27,7 +26,7 @@
 
   header{
     background:#ffffff;
-    border-bottom:6px solid #d71920; /* barra CPS */
+    border-bottom:6px solid #d71920;
     padding:18px 0;
   }
   .header-container{
@@ -58,7 +57,6 @@
     color:white;
   }
 
-  /* Form */
   .container{
     max-width:900px;
     margin:28px auto;
@@ -90,7 +88,6 @@
   }
   .btn-primary:hover{ background:#f07171 }
 
-  /* Admin panel */
   #admin-panel{
     max-width:1100px;
     margin:26px auto;
@@ -135,7 +132,6 @@
   </div>
 </header>
 
-<!-- FORMULÁRIO -->
 <div class="container" id="form-container">
   <h2>Formulário de Inscrição</h2>
 
@@ -148,7 +144,6 @@
       <option value="">Selecionar...</option>
       <option>1ADI</option>
       <option>1MAI</option>
-      <option>1NTD</option>
       <option>VERDE</option>
       <option>2MAI</option>
       <option>2MKT</option>
@@ -186,7 +181,6 @@
 <script>
 
 const STORAGE_KEY = "inter_regs_v1";
-
 let regs = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
 
 const LIMITS = {
@@ -209,14 +203,10 @@ const LIMITS = {
 
 const ALL_MODALITIES = Object.keys(LIMITS);
 
-
 const BLOCK_FOR_VERDE = [
   "Futsal Masculino",
   "Futsal Feminino",
-  "Handebol Feminino",
-  "Fifa",
-  "Free Fire",
-  "Clash Royale"
+  "Handebol Feminino"
 ];
 
 const selTurma = document.getElementById("turma");
@@ -238,7 +228,6 @@ function updateModalities(){
 }
 
 selTurma.addEventListener("change", updateModalities);
-
 
 document.getElementById("registerForm").addEventListener("submit", e=>{
   e.preventDefault();
@@ -269,7 +258,7 @@ document.getElementById("registerForm").addEventListener("submit", e=>{
 });
 
 
-/* pagina admin login*/
+/* LOGIN ADMIN */
 function openAdminLogin(){
   const senha = prompt("Digite a senha do administrador:");
   if(senha === "2304"){
@@ -282,8 +271,8 @@ function openAdminLogin(){
   }
 }
 
+/* TABELA ADMIN */
 
-/* pagina admin filtro/tabela */
 const filterMod = document.getElementById("filterMod");
 const tableBody = document.getElementById("table-body");
 
@@ -329,8 +318,6 @@ function delReg(created){
   loadTable();
 }
 
-
-/* apagar tudo */
 function resetAll(){
   if(!confirm("Tem certeza?")) return;
   localStorage.removeItem(STORAGE_KEY);
@@ -338,6 +325,42 @@ function resetAll(){
   loadTable();
   alert("Limpo!");
 }
+
+
+/* =======================================================
+     SISTEMA DE RECUPERAÇÃO AUTOMÁTICA DAS INSCRIÇÕES
+   ======================================================= */
+
+(function restoreOldRegs(){
+
+  const old = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+  if (!old.length) return;
+  if (localStorage.getItem("already_restored")) return;
+
+  setTimeout(()=>{
+    if (confirm(`Encontramos ${old.length} inscrições antigas neste dispositivo.\nDeseja reenviar para o sistema?`)) {
+
+      let adminData = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+
+      old.forEach(item => {
+        adminData.push({
+          ...item,
+          recovered: true,
+          recovered_at: new Date().toISOString()
+        });
+      });
+
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(adminData));
+
+      alert("Inscrições recuperadas com sucesso!");
+    }
+
+    localStorage.setItem("already_restored", "1");
+  }, 600);
+
+})();
+
 </script>
 
 </body>
